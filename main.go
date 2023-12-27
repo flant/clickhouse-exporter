@@ -6,11 +6,13 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
+	"github.com/alecthomas/kingpin/v2"
 	"github.com/altinity/clickhouse-operator/pkg/apis/metrics"
+	"github.com/altinity/clickhouse-operator/pkg/model/clickhouse"
 	"github.com/prometheus/common/version"
 	"github.com/sirupsen/logrus"
-	"gopkg.in/alecthomas/kingpin.v2"
 )
 
 const (
@@ -100,15 +102,39 @@ func main() {
 	log.Infof("Starting metrics exporter %s", version.Info())
 	log.Infof("Build context %s", version.BuildContext())
 
-	metrics.StartMetricsREST(
-		metrics.NewCHAccessInfo(scheme, username, password, port),
+	// TODO: rootCA
+	clusterConnectionParams := clickhouse.NewClusterConnectionParams(scheme, username, password, "", port)
+	// TODO: multiple hostnames
+	params := clusterConnectionParams.NewEndpointConnectionParams(hostnames[0])
+	metrics.NewClickHouseFetcher(params)
 
+	host := &metrics.WatchedHost{
+		Name:      namespace,
+		Hostname:  "",
+		TCPPort:   0,
+		TLSPort:   0,
+		HTTPPort:  0,
+		HTTPSPort: 0,
+	}
+	cluster := &metrics.WatchedCluster{
+		Name:  chiName,
+		Hosts: []*metrics.WatchedHost{host},
+	}
+	metrics.StartMetricsREST(
 		metricsEP,
 		metricsPath,
-
+		time.Second*30,
 		chiListEP,
 		chiListPath,
-	).UpdateWatch(namespace, chiName, hostnames)
+	).UpdateWatch(namespace, chiName, []*metrics.WatchedCluster{cluster})
+
+	// metrics.StartMetricsREST(
+	// 	metricsEP,
+	// 	metricsPath,
+	// 	time.Second*30,
+	// 	chiListEP,
+	// 	chiListPath,
+	// ).UpdateWatch(namespace, chiName, hostnames)
 
 	<-ctx.Done()
 }
