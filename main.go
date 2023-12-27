@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/alecthomas/kingpin/v2"
 	"github.com/altinity/clickhouse-operator/pkg/apis/metrics"
@@ -103,38 +102,26 @@ func main() {
 	log.Infof("Build context %s", version.BuildContext())
 
 	// TODO: rootCA
-	clusterConnectionParams := clickhouse.NewClusterConnectionParams(scheme, username, password, "", port)
-	// TODO: multiple hostnames
-	params := clusterConnectionParams.NewEndpointConnectionParams(hostnames[0])
-	metrics.NewClickHouseFetcher(params)
+	params := clickhouse.NewClusterConnectionParams(
+		scheme,
+		username,
+		password,
+		"",
+		port,
+	)
+	// TODO: timeouts
+	// params.SetConnectTimeout()
+	// params.SetQueryTimeout()
 
-	host := &metrics.WatchedHost{
-		Name:      namespace,
-		Hostname:  "",
-		TCPPort:   0,
-		TLSPort:   0,
-		HTTPPort:  0,
-		HTTPSPort: 0,
-	}
-	cluster := &metrics.WatchedCluster{
-		Name:  chiName,
-		Hosts: []*metrics.WatchedHost{host},
-	}
 	metrics.StartMetricsREST(
+		params,
+
 		metricsEP,
 		metricsPath,
-		time.Second*30,
+
 		chiListEP,
 		chiListPath,
-	).UpdateWatch(namespace, chiName, []*metrics.WatchedCluster{cluster})
-
-	// metrics.StartMetricsREST(
-	// 	metricsEP,
-	// 	metricsPath,
-	// 	time.Second*30,
-	// 	chiListEP,
-	// 	chiListPath,
-	// ).UpdateWatch(namespace, chiName, hostnames)
+	).UpdateWatch(namespace, chiName, hostnames)
 
 	<-ctx.Done()
 }

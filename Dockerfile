@@ -2,7 +2,7 @@ FROM golang:1.21-bullseye as builder
 
 WORKDIR /src/clickhouse-exporter
 
-ARG CHOP_VERSION=release-0.22.2
+ARG CHOP_VERSION=release-0.20.1
 ARG PROMU_VERSION=0.15.0
 
 COPY . .

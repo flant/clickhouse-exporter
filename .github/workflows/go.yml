@@ -17,7 +17,7 @@ jobs:
     - uses: actions/checkout@v4
       with:
         repository: altinity/clickhouse-operator
-        ref: release-0.22.2
+        ref: release-0.20.1
         path: clickhouse-operator
 
     - name: Set up Go

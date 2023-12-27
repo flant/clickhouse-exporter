@@ -5,7 +5,7 @@ artifact: builder
 from: golang:1.21-bullseye
 git:
 - url: https://github.com/altinity/clickhouse-operator
-  tag: release-0.22.2
+  tag: release-0.20.1
   to: /src/clickhouse-operator
 - add: /
   to: /src/clickhouse-exporter
