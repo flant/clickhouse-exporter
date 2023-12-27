@@ -11,22 +11,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         path: clickhouse-exporter
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         repository: altinity/clickhouse-operator
-        ref: '0.18.5'
+        ref: release-0.22.2
         path: clickhouse-operator
 
     - name: Set up Go
-      uses: actions/setup-go@v3
+      uses: actions/setup-go@v5
       with:
-        go-version: 1.18
+        go-version: 1.21
 
     - name: Install promu package
-      run: go install -v github.com/prometheus/promu@v0.13.0
+      run: go install -v github.com/prometheus/promu@v0.15.0
 
     - name: Build
       run: |

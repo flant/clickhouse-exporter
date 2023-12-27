@@ -1,9 +1,9 @@
-FROM golang:1.18-buster as builder
+FROM golang:1.21-bullseye as builder
 
 WORKDIR /src/clickhouse-exporter
 
-ARG CHOP_VERSION=0.18.5
-ARG PROMU_VERSION=0.13.0
+ARG CHOP_VERSION=release-0.22.2
+ARG PROMU_VERSION=0.15.0
 
 COPY . .
 
@@ -12,7 +12,7 @@ RUN git clone --single-branch --branch $CHOP_VERSION https://github.com/altinity
     && /go/bin/promu build -v --prefix build
 
 
-FROM debian:buster-slim
+FROM debian:bullseye-slim
 LABEL maintainer="Vasily Maryutenkov <vasily.maryutenkov@flant.com>"
 
 RUN DEBIAN_FRONTEND=noninteractive; apt-get update \
