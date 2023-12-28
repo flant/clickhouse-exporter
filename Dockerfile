@@ -18,7 +18,8 @@ LABEL maintainer="Vasily Maryutenkov <vasily.maryutenkov@flant.com>"
 RUN DEBIAN_FRONTEND=noninteractive; apt-get update \
     && apt-get install -qy --no-install-recommends \
         ca-certificates \
-        curl
+        curl \
+    && rm -rf /var/cache/apt/* /var/lib/apt/lists/*
 
 COPY --from=builder /src/clickhouse-exporter/build/clickhouse-exporter /clickhouse-exporter
 
