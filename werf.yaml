@@ -32,10 +32,3 @@ import:
   add: /src/clickhouse-exporter/build/clickhouse-exporter
   to: /clickhouse-exporter
   before: install
-shell:
-  beforeInstall: |
-    DEBIAN_FRONTEND=noninteractive; apt-get update \
-      && apt-get install -qy --no-install-recommends \
-          ca-certificates \
-          curl
-    rm -rf /var/cache/apt/* /var/lib/apt/lists/*
