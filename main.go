@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/alecthomas/kingpin/v2"
 	"github.com/altinity/clickhouse-operator/pkg/apis/metrics"
@@ -20,24 +21,30 @@ const (
 	defaultMetricsEndpoint = ":8888"
 	defaultChiListEP       = ":8888"
 
-	defaultChScheme = "http"
-	defaultChHost   = "127.0.0.1"
-	defaultChUser   = "default"
-	defaultChPass   = ""
-	defaultChPort   = "8123"
+	defaultChScheme       = "http"
+	defaultChHost         = "127.0.0.1"
+	defaultChUser         = "default"
+	defaultChPass         = ""
+	defaultChPort         = "8123"
+	defaultChRootCA       = ""
+	defaultTimeoutConnect = "2s"
+	defaultTimeoutQuery   = "5s"
 
 	metricsPath = "/metrics"
 	chiListPath = "/chi"
 )
 
 var (
-	scheme    string
-	username  string
-	password  string
-	port      int
-	namespace string
-	chiName   string
-	hostnames []string
+	scheme         string
+	username       string
+	password       string
+	port           int
+	namespace      string
+	chiName        string
+	hostnames      []string
+	rootCA         string
+	connectTimeout time.Duration
+	queryTimeout   time.Duration
 
 	metricsEP string
 	chiListEP string
@@ -67,6 +74,14 @@ func init() {
 		Default(defaultChPort).Envar("CH_PORT").IntVar(&port)
 	kingpin.Flag("address", "A list of Clickhouse hosts").
 		Default(defaultChHost).StringsVar(&hostnames)
+	kingpin.Flag("root-ca", "Path to root CA").
+		Default(defaultChRootCA).Envar("CH_ROOT_CA").StringsVar(&hostnames)
+	kingpin.Flag("connect-timeout", "").
+		Default(defaultTimeoutConnect).
+		Envar("CH_CONNECT_TIMEOUT").DurationVar(&connectTimeout)
+	kingpin.Flag("query-timeout", "").
+		Default(defaultTimeoutQuery).
+		Envar("CH_QUERY_TIMEOUT").DurationVar(&queryTimeout)
 	kingpin.Flag("log-level",
 		"Only log messages with the given severity or above. Valid levels: [debug, info, warn, error, fatal]",
 	).Default("info").EnumVar(&logLevel, "debug", "info", "warn", "error", "fatal")
@@ -101,17 +116,15 @@ func main() {
 	log.Infof("Starting metrics exporter %s", version.Info())
 	log.Infof("Build context %s", version.BuildContext())
 
-	// TODO: rootCA
 	params := clickhouse.NewClusterConnectionParams(
 		scheme,
 		username,
 		password,
-		"",
+		rootCA,
 		port,
 	)
-	// TODO: timeouts
-	// params.SetConnectTimeout()
-	// params.SetQueryTimeout()
+	params.SetConnectTimeout(connectTimeout)
+	params.SetQueryTimeout(queryTimeout)
 
 	metrics.StartMetricsREST(
 		params,
