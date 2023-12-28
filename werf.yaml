@@ -32,14 +32,10 @@ import:
   add: /src/clickhouse-exporter/build/clickhouse-exporter
   to: /clickhouse-exporter
   before: install
-mount:
-- from: tmp_dir
-  to: /var/cache/apt
-- from: tmp_dir
-  to: /var/lib/apt/lists
 shell:
   beforeInstall: |
     DEBIAN_FRONTEND=noninteractive; apt-get update \
       && apt-get install -qy --no-install-recommends \
           ca-certificates \
           curl
+    rm -rf /var/cache/apt/* /var/lib/apt/lists/*
