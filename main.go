@@ -75,7 +75,7 @@ func init() {
 	kingpin.Flag("address", "A list of Clickhouse hosts").
 		Default(defaultChHost).StringsVar(&hostnames)
 	kingpin.Flag("root-ca", "Path to root CA").
-		Default(defaultChRootCA).Envar("CH_ROOT_CA").StringsVar(&hostnames)
+		Default(defaultChRootCA).Envar("CH_ROOT_CA").StringVar(&rootCA)
 	kingpin.Flag("connect-timeout", "").
 		Default(defaultTimeoutConnect).
 		Envar("CH_CONNECT_TIMEOUT").DurationVar(&connectTimeout)
